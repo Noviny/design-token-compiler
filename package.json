@@ -1,0 +1,10 @@
+{
+  "name": "@noviny/design-token-compiler",
+  "version": "0.0.0",
+  "devDependencies": {
+    "jest": "^24.9.0"
+  },
+  "prettier": {
+    "trailingComma": "all"
+  }
+}
