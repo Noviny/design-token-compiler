@@ -9,6 +9,24 @@ const checkIsSet = lines => {
   return checkSet.has("SetItemDeclarator");
 };
 
+const checkIsObject = lines => {
+  let checkSet = new Set();
+
+  lines.forEach(l =>
+    l.children ? checkSet.add("hasChildren") : checkSet.add("hasNoChildren"),
+  );
+  if (checkSet.size > 1) {
+    throw new Error("Parsing error: Set and non-set items were intermixed");
+  }
+
+  return checkSet.has("hasChildren");
+};
+
+const parseFollowingReferences = tokens => {
+  // If we are calling this function we assume we have no children, so it will either
+  // call itself, or terminate
+};
+
 const parseSetItems = lines =>
   lines.map(({ tokens }) => {
     let expectedItemDeclarator = tokens.shift();
@@ -24,16 +42,27 @@ const parseVariableDeclarationHelper = (key, children) => {
   if (checkIsSet(children)) {
     return {
       type: "SetDeclaration",
-      key: key.value,
+      key,
       items: parseSetItems(children),
     };
-  } else if (children.length === 1) {
+  } else if (checkIsObject(children)) {
     return {
-      type: "VariableDeclaration",
-      key: key.value,
+      type: "PropertyDeclaration",
+      key,
+      children: children.map(parseLines),
+    };
+  } else if ((children.length = 1)) {
+    return {
+      type: "LeafPropertyDeclaration",
+      key,
       value: parseLines(children[0]),
     };
   }
+  throw new Error(`an impossible state parsing a variable: "${key.value}`);
+};
+
+const checkKeySeparator = secondToken => {
+  return !secondToken || secondToken.type === "KeySeparator";
 };
 
 const parseLines = ({ children, tokens }) => {
@@ -47,13 +76,9 @@ const parseLines = ({ children, tokens }) => {
     case "Variable": {
       let key = tokens.shift();
       let secondToken = tokens.shift();
-
       if (children) {
-        if (
-          !secondToken ||
-          (secondToken.type === "KeySeparator" && tokens.length === 0)
-        ) {
-          return parseVariableDeclarationHelper(key, children);
+        if (checkKeySeparator(secondToken) && tokens.length === 0) {
+          return parseVariableDeclarationHelper(key.value, children);
         }
         throw new Error(
           `Variable "${key.value}" had children but this should be impossible here`,
@@ -63,13 +88,28 @@ const parseLines = ({ children, tokens }) => {
       if (!secondToken) {
         return {
           type: "VariableUsage",
+          // TODO: decide if this should just be key, or if key.value is enough
+          // Note that this decision should strongly be made in conjunction with
+          // a decision on how we handle "ObjectReferenceSeparator" as it uses
+          // the same node type, but with a different signature for value
           value: key.value,
         };
       }
 
-      if (secondToken.type === "KeySeparator" && tokens.length !== 0) {
+      if (checkKeySeparator(secondToken) && tokens.length !== 0) {
         // TODO: Make this line less actual trash
-        return parseVariableDeclarationHelper(key, [{ tokens }]);
+        return parseVariableDeclarationHelper(key.value, [{ tokens }]);
+      }
+
+      if (secondToken.type === "ObjectReferenceSeparator") {
+        return {
+          type: "VariableUsage",
+          value: {
+            type: "ChainedvariableUsage",
+            left: key.value,
+            right: parseLines({ tokens }),
+          },
+        };
       }
 
       throw new Error(

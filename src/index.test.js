@@ -57,9 +57,40 @@ let parserTests = [
       type: "Root",
       children: [
         {
-          type: "VariableDeclaration",
+          type: "LeafPropertyDeclaration",
           key: "someKey",
           value: { type: "String", value: "someValue" },
+        },
+      ],
+    },
+  },
+  {
+    fileBody: `someKey: something.somethingElse`,
+    tokenSet: [
+      { type: "Variable", value: "someKey" },
+      { type: "KeySeparator" },
+      { type: "Variable", value: "something" },
+      { type: "ObjectReferenceSeparator" },
+      { type: "Variable", value: "somethingElse" },
+    ],
+    only: true,
+    AST: {
+      type: "Root",
+      children: [
+        {
+          type: "LeafPropertyDeclaration",
+          key: "someKey",
+          value: {
+            type: "VariableUsage",
+            value: {
+              type: "ChainedvariableUsage",
+              left: "something",
+              right: {
+                type: "VariableUsage",
+                value: "somethingElse",
+              },
+            },
+          },
         },
       ],
     },
@@ -149,7 +180,7 @@ let parserTests = [
       type: "Root",
       children: [
         {
-          type: "VariableDeclaration",
+          type: "LeafPropertyDeclaration",
           key: "someKey",
           value: { type: "String", value: "someValue" },
         },
@@ -170,7 +201,7 @@ let parserTests = [
       type: "Root",
       children: [
         {
-          type: "VariableDeclaration",
+          type: "LeafPropertyDeclaration",
           key: "someKey",
           value: { type: "VariableUsage", value: "someValue" },
         },
@@ -188,7 +219,7 @@ let parserTests = [
       type: "Root",
       children: [
         {
-          type: "VariableDeclaration",
+          type: "LeafPropertyDeclaration",
           key: "someKey",
           value: { type: "String", value: "something here" },
         },
@@ -209,17 +240,16 @@ let parserTests = [
       { type: "Indent" },
       { type: "String", value: "Hark! A string!" },
     ],
-    skip: true,
     AST: {
       type: "Root",
       children: [
         {
-          type: "ObjectDeclaration",
-          name: "someKey",
-          keys: [
+          type: "PropertyDeclaration",
+          key: "someKey",
+          children: [
             {
-              type: "VariableDeclaration",
-              key: "SecondKey",
+              type: "LeafPropertyDeclaration",
+              key: "secondKey",
               value: { type: "String", value: "Hark! A string!" },
             },
           ],

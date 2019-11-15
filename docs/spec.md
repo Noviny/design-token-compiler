@@ -1,5 +1,14 @@
 // schema
 
+Implemented Schema:
+
+```
+String:: '"' : any characters other than '"' : '"'
+Indent:: '\t' | '  '
+LineBreak:: '\n'
+SetItemDeclarator:: '- '
+```
+
 ```
 color:: [color-like-string : reference]
 
