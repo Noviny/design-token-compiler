@@ -3,6 +3,7 @@ const compilerSwitch = (node, initialTree) => {
     case "LeafPropertyDeclaration": {
       return compilerSwitch(node.value, initialTree);
     }
+    case "PropertyDeclaration":
     case "Root": {
       let tokens = {};
 
@@ -10,6 +11,12 @@ const compilerSwitch = (node, initialTree) => {
         tokens[childNode.key] = compilerSwitch(childNode, initialTree);
       }
       return tokens;
+    }
+    case "SetDeclaration": {
+      return node.items.map(i => compilerSwitch(i, initialTree));
+    }
+    case "Number": {
+      return parseInt(node.value);
     }
     case "String": {
       return node.value;

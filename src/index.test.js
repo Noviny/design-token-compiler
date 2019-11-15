@@ -64,12 +64,12 @@ let parserTests = [
         },
       ],
     },
-    only: true,
     JSONoutput: {
       someKey: "someValue",
     },
   },
   {
+    skipOutput: true,
     fileBody: `someKey: something.somethingElse`,
     tokenSet: [
       { type: "Variable", value: "someKey" },
@@ -100,6 +100,9 @@ let parserTests = [
     },
   },
   {
+    JSONoutput: {
+      scale: [0, 52, "5rem"],
+    },
     fileBody: `scale
   - 0
   - 52
@@ -135,6 +138,9 @@ let parserTests = [
     },
   },
   {
+    JSONoutput: {
+      scale: [0, 52, "5rem"],
+    },
     fileBody: `scale:
   - 0
   - 52
@@ -171,6 +177,9 @@ let parserTests = [
     },
   },
   {
+    JSONoutput: {
+      someKey: "someValue",
+    },
     fileBody: `someKey:
   "someValue"`,
     tokenSet: [
@@ -192,6 +201,7 @@ let parserTests = [
     },
   },
   {
+    skipOutput: true,
     fileBody: `someKey:
   someValue`,
     tokenSet: [
@@ -213,6 +223,9 @@ let parserTests = [
     },
   },
   {
+    JSONoutput: {
+      someKey: "something here",
+    },
     fileBody: `someKey: "something here"`,
     tokenSet: [
       { type: "Variable", value: "someKey" },
@@ -231,6 +244,11 @@ let parserTests = [
     },
   },
   {
+    JSONoutput: {
+      someKey: {
+        secondKey: "Hark! A string!",
+      },
+    },
     fileBody: `someKey
   secondKey
     "Hark! A string!"`,
