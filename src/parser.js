@@ -21,13 +21,13 @@ const parseSetItems = lines =>
   });
 
 const parseVariableDeclarationHelper = (key, children) => {
-  if (children && checkIsSet(children)) {
+  if (checkIsSet(children)) {
     return {
       type: "SetDeclaration",
       key: key.value,
       items: parseSetItems(children),
     };
-  } else if (children && children.length === 1) {
+  } else if (children.length === 1) {
     return {
       type: "VariableDeclaration",
       key: key.value,
@@ -59,24 +59,22 @@ const parseLines = ({ children, tokens }) => {
           `Variable "${key.value}" had children but this should be impossible here`,
         );
       }
+
       if (!secondToken) {
         return {
           type: "VariableUsage",
           value: key.value,
         };
       }
+
+      if (secondToken.type === "KeySeparator" && tokens.length !== 0) {
+        // TODO: Make this line less actual trash
+        return parseVariableDeclarationHelper(key, [{ tokens }]);
+      }
+
       throw new Error(
-        `When passing variable "${key.value}" we came across an unknown variable usage`,
+        `Something has gone wrong in variable parsing: "${key.value}"`,
       );
-
-      // Valid things to do with variables:
-
-      // ```
-      // declaring: "some value"
-
-      // using:
-      //   someValue
-      // ```;
     }
     case "String":
     case "Number": {

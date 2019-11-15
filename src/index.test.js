@@ -177,6 +177,56 @@ let parserTests = [
       ],
     },
   },
+  {
+    fileBody: `someKey: "something here"`,
+    tokenSet: [
+      { type: "Variable", value: "someKey" },
+      { type: "KeySeparator" },
+      { type: "String", value: "something here" },
+    ],
+    AST: {
+      type: "Root",
+      children: [
+        {
+          type: "VariableDeclaration",
+          key: "someKey",
+          value: { type: "String", value: "something here" },
+        },
+      ],
+    },
+  },
+  {
+    fileBody: `someKey
+  secondKey
+    "Hark! A string!"`,
+    tokenSet: [
+      { type: "Variable", value: "someKey" },
+      { type: "LineBreak" },
+      { type: "Indent" },
+      { type: "Variable", value: "secondKey" },
+      { type: "LineBreak" },
+      { type: "Indent" },
+      { type: "Indent" },
+      { type: "String", value: "Hark! A string!" },
+    ],
+    skip: true,
+    AST: {
+      type: "Root",
+      children: [
+        {
+          type: "ObjectDeclaration",
+          name: "someKey",
+          keys: [
+            {
+              type: "VariableDeclaration",
+              key: "SecondKey",
+              value: { type: "String", value: "Hark! A string!" },
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 let expectations = [...tokenOnlyTests, ...parserTests];
