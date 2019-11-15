@@ -1,5 +1,6 @@
 const tokenizer = require("./tokenizer");
 const parser = require("./parser");
+const jsonCompiler = require("./jsonCompiler");
 
 let expecationsSpec = {
   name: "test name",
@@ -63,6 +64,10 @@ let parserTests = [
         },
       ],
     },
+    only: true,
+    JSONoutput: {
+      someKey: "someValue",
+    },
   },
   {
     fileBody: `someKey: something.somethingElse`,
@@ -73,7 +78,6 @@ let parserTests = [
       { type: "ObjectReferenceSeparator" },
       { type: "Variable", value: "somethingElse" },
     ],
-    only: true,
     AST: {
       type: "Root",
       children: [
@@ -270,7 +274,7 @@ let getTestBlock = (
     JSONoutput,
     skipTokenizing,
     skipParsing,
-    skipOutput = true,
+    skipOutput,
     skip,
   },
   i,
@@ -289,8 +293,7 @@ let getTestBlock = (
     }
     if (AST && !skipOutput) {
       it("compiler", () => {
-        throw new Error("we don't have a compiler yet");
-        // expect(compiler(AST)).toMatchObject(JSONoutput);
+        expect(jsonCompiler(AST)).toEqual(JSONoutput);
       });
     }
   });
